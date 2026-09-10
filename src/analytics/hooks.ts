@@ -1,16 +1,16 @@
 import React from 'react';
-import { analyticsService } from './AnalyticsService';
+import { analyticsService, CallerEventProperties } from './AnalyticsService';
 import { useIsAnalyticsEnabled } from './conditional-checks';
-import { EventPropertiesMap, TrackEvents } from './gen/analytics-types';
+import { TrackEvents } from './gen/analytics-types';
 
 export const useTrackAnalyticsEvent = (): (<E extends TrackEvents>(
   event: E,
-  properties: EventPropertiesMap[E],
+  properties: CallerEventProperties<E>,
 ) => void) => {
   const isAnalyticsEnabled = useIsAnalyticsEnabled();
 
   return React.useCallback(
-    <E extends TrackEvents>(event: E, properties: EventPropertiesMap[E]) => {
+    <E extends TrackEvents>(event: E, properties: CallerEventProperties<E>) => {
       if (isAnalyticsEnabled) {
         void analyticsService.track<E>(event, properties);
       }

@@ -165,14 +165,19 @@ export enum TrackEvents {
 }
 
 /**
+ * Event-specific properties callers must supply.
+ * CommonFields and userId are excluded — both are merged automatically from commonProperties.
+ */
+type TrackEventProperties<T> = Omit<T, keyof CommonFields | 'userId'>;
+
+/**
  * Maps each TrackEvents value to the event-specific properties callers must supply.
- * CommonFields are excluded — they are merged automatically from commonProperties.
  */
 export type EventPropertiesMap = {
-  [TrackEvents.user_login_event]: Omit<UserLoginEvent, keyof CommonFields>;
-  [TrackEvents.user_logout_event]: Omit<UserLogoutEvent, keyof CommonFields>;
-  [TrackEvents.user_journey_event]: Omit<UserJourneyEvent, keyof CommonFields>;
-  [TrackEvents.feedback_submitted_event]: Omit<FeedbackSubmittedEvent, keyof CommonFields>;
-  [TrackEvents.ui_session_started_event]: Omit<UiSessionStartedEvent, keyof CommonFields>;
-  [TrackEvents.feature_flags_changed_event]: Omit<FeatureFlagsChangedEvent, keyof CommonFields>;
+  [TrackEvents.user_login_event]: TrackEventProperties<UserLoginEvent>;
+  [TrackEvents.user_logout_event]: TrackEventProperties<UserLogoutEvent>;
+  [TrackEvents.user_journey_event]: TrackEventProperties<UserJourneyEvent>;
+  [TrackEvents.feedback_submitted_event]: TrackEventProperties<FeedbackSubmittedEvent>;
+  [TrackEvents.ui_session_started_event]: TrackEventProperties<UiSessionStartedEvent>;
+  [TrackEvents.feature_flags_changed_event]: TrackEventProperties<FeatureFlagsChangedEvent>;
 };

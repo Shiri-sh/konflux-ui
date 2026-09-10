@@ -113,17 +113,35 @@ async function main() {
     '',
   ].join('\n');
 
+  const eventHasUserId = (def) =>
+    (def.allOf || []).some((entry) => entry.properties?.userId);
+
+  const omitKeysForEvent = (key, def) => {
+    const typeName = toPascalCase(key);
+    if (eventHasUserId(def)) {
+      return `  [TrackEvents.${key}]: TrackEventProperties<${typeName}>;`;
+    }
+    return `  [TrackEvents.${key}]: Omit<${typeName}, keyof CommonFields>;`;
+  };
+
   // Generate EventPropertiesMap — maps each TrackEvents value to its event-specific
-  // properties with CommonFields excluded (they are merged via commonProperties).
-  const mapEntries = eventDefs.map(
-    ([key]) => `  [TrackEvents.${key}]: Omit<${toPascalCase(key)}, keyof CommonFields>;`,
-  );
+  // properties. CommonFields and userId are merged via commonProperties at runtime.
+  const mapEntries = eventDefs.map(([key, def]) => omitKeysForEvent(key, def));
+
+  const trackEventPropertiesType = [
+    '/**',
+    ' * Event-specific properties callers must supply.',
+    ' * CommonFields and userId are excluded — both are merged automatically from commonProperties.',
+    ' */',
+    "type TrackEventProperties<T> = Omit<T, keyof CommonFields | 'userId'>;",
+    '',
+  ].join('\n');
 
   const mapBlock = [
     '',
+    trackEventPropertiesType,
     '/**',
     ' * Maps each TrackEvents value to the event-specific properties callers must supply.',
-    ' * CommonFields are excluded — they are merged automatically from commonProperties.',
     ' */',
     'export type EventPropertiesMap = {',
     ...mapEntries,

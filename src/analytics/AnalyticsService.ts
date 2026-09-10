@@ -9,6 +9,9 @@ export type CommonAnalyticsProperties = CommonFields & {
   userId: SHA256Hash;
 };
 
+/** Properties callers pass to track(); userId is merged from commonProperties. */
+export type CallerEventProperties<E extends TrackEvents> = Omit<EventPropertiesMap[E], 'userId'>;
+
 export class AnalyticsService {
   private commonProperties: Partial<CommonAnalyticsProperties> = {};
 
@@ -16,7 +19,7 @@ export class AnalyticsService {
     this.commonProperties = { ...this.commonProperties, ...properties };
   }
 
-  track<E extends TrackEvents>(event: E, properties: EventPropertiesMap[E]): void {
+  track<E extends TrackEvents>(event: E, properties: CallerEventProperties<E>): void {
     void getAnalytics()?.track(event, { ...this.commonProperties, ...properties });
   }
 
